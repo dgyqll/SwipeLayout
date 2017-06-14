@@ -28,6 +28,7 @@ public class SwipeLayout extends FrameLayout {
     private ViewDragHelper dragHelper;
 
 
+    private float offset = 0.0f;
     public SwipeLayout(@NonNull Context context) {
         this(context,null);
     }
@@ -78,6 +79,7 @@ public class SwipeLayout extends FrameLayout {
         @Override
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
             super.onViewPositionChanged(changedView, left, top, dx, dy);
+            offset = dx;
 
             //让swipeView做伴随移动
             if (changedView == contentView) {
@@ -110,15 +112,26 @@ public class SwipeLayout extends FrameLayout {
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
             super.onViewReleased(releasedChild, xvel, yvel);
 
-            if (contentView.getLeft() < -swipeViewMeasuredWidth / 2) {  //向左边滑动
-                dragHelper.smoothSlideViewTo(contentView, -swipeViewMeasuredWidth, 0);
-                ViewCompat.postInvalidateOnAnimation(contentView);
+            if (offset < 0) {
+                if (contentView.getLeft() < -swipeViewMeasuredWidth / 4) {  //向左边滑动
+                    dragHelper.smoothSlideViewTo(contentView, -swipeViewMeasuredWidth, 0);
+                    ViewCompat.postInvalidateOnAnimation(contentView);
+                } else {    //向右边滑动
+                    dragHelper.smoothSlideViewTo(contentView, 0, 0);
+                    ViewCompat.postInvalidateOnAnimation(contentView);
 
-            } else {    //向右边滑动
-                dragHelper.smoothSlideViewTo(contentView, 0, 0);
-                ViewCompat.postInvalidateOnAnimation(contentView);
+                }
+            } else {
+                if (contentView.getLeft() > -swipeViewMeasuredWidth * 3/ 4) {  //向右边滑动
+                    dragHelper.smoothSlideViewTo(contentView, 0, 0);
+                    ViewCompat.postInvalidateOnAnimation(contentView);
+                } else {    //向左边滑动
+                    dragHelper.smoothSlideViewTo(contentView, -swipeViewMeasuredWidth, 0);
+                    ViewCompat.postInvalidateOnAnimation(contentView);
 
+                }
             }
+
         }
     };
 
