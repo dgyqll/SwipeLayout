@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:background="#D6CBAF"
+    android:layout_height="50dp">
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_centerVertical="true"
+            android:layout_margin="5dp"
+            android:layout_width="match_parent"
+            android:singleLine="true"
+            android:text="眼看就赢了啊！国足国足加油吧！"
+            android:textSize="16sp"
+            android:layout_height="wrap_content" />
+</RelativeLayout>
