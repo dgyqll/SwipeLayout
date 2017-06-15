@@ -29,6 +29,9 @@ public class SwipeLayout extends FrameLayout {
 
 
     private float offset = 0.0f;
+    private float downX;
+    private float downY;
+
     public SwipeLayout(@NonNull Context context) {
         this(context,null);
     }
@@ -46,7 +49,7 @@ public class SwipeLayout extends FrameLayout {
         dragHelper = ViewDragHelper.create(this, mCallBack);
     }
 
-    ViewDragHelper.Callback mCallBack = new ViewDragHelper.Callback() {
+    public ViewDragHelper.Callback mCallBack = new ViewDragHelper.Callback() {
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
             return child == contentView || child == swipeView ;
@@ -54,6 +57,11 @@ public class SwipeLayout extends FrameLayout {
 
         @Override
         public int clampViewPositionHorizontal(View child, int left, int dx) {
+
+            if (!SwipeLayoutManager.getInstance().isCanSwipe(SwipeLayout.this)) {
+                SwipeLayoutManager.getInstance().close();
+                return 0;
+            }
             //限制contentView的移动位置
             if (child == contentView) {
                 if (left > 0) {
@@ -80,7 +88,6 @@ public class SwipeLayout extends FrameLayout {
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
             super.onViewPositionChanged(changedView, left, top, dx, dy);
             offset = dx;
-
             //让swipeView做伴随移动
             if (changedView == contentView) {
                 int newLeft = swipeView.getLeft() + dx;
@@ -91,7 +98,6 @@ public class SwipeLayout extends FrameLayout {
                     newLeft = contentViewMeasuredWidth;
                 }
                 swipeView.layout(newLeft, 0, newLeft + swipeViewMeasuredWidth, swipeViewMeasuredHeight);
-
             }
 
             //让contentView做伴随移动
@@ -105,12 +111,23 @@ public class SwipeLayout extends FrameLayout {
                     newLeft = -swipeViewMeasuredWidth;
                 }
                 contentView.layout(newLeft,0,newLeft + contentViewMeasuredWidth,contentViewMeasuredHeight);
+
             }
+
+            if (contentView.getLeft() == -swipeViewMeasuredWidth) {
+                SwipeLayoutManager.getInstance().setSwipeLayout(SwipeLayout.this);
+
+            }else if (contentView.getLeft() == 0) {
+                SwipeLayoutManager.getInstance().setSwipeLayout(null);
+            }
+
         }
 
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
             super.onViewReleased(releasedChild, xvel, yvel);
+
+
 
             if (offset < 0) {
                 if (contentView.getLeft() < -swipeViewMeasuredWidth / 4) {  //向左边滑动
@@ -132,6 +149,8 @@ public class SwipeLayout extends FrameLayout {
                 }
             }
 
+
+
         }
     };
 
@@ -147,12 +166,42 @@ public class SwipeLayout extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-
+        if (!SwipeLayoutManager.getInstance().isCanSwipe(SwipeLayout.this)) {
+            SwipeLayoutManager.getInstance().close();
+            requestDisallowInterceptTouchEvent(true);
+        }
         return dragHelper.shouldInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!SwipeLayoutManager.getInstance().isCanSwipe(SwipeLayout.this)) {
+            SwipeLayoutManager.getInstance().close();
+            requestDisallowInterceptTouchEvent(true);
+        }
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                downX = event.getX();
+                downY = event.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+
+                float distanceX = Math.abs(event.getX() - downX);
+                float distanceY = Math.abs(event.getY() - downY);
+                if (distanceX > distanceY) {
+                    requestDisallowInterceptTouchEvent(true);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                float X = event.getX()- downX;
+                float Y = event.getY() - downY;
+                double distance = Math.sqrt(X * X + Y * Y);
+                if (Math.abs(distance) < 8) {
+                    performClick();
+                }
+
+                break;
+        }
         dragHelper.processTouchEvent(event);
         return true;
     }
@@ -197,25 +246,15 @@ public class SwipeLayout extends FrameLayout {
      * 打开
      */
     public void open(){
-        if (isExpand()) {
-            dragHelper.smoothSlideViewTo(contentView,  -swipeViewMeasuredWidth, 0);
-            ViewCompat.postInvalidateOnAnimation(contentView);
-        } else {
-            dragHelper.smoothSlideViewTo(contentView,0, 0);
-            ViewCompat.postInvalidateOnAnimation(contentView);
-        }
+        dragHelper.smoothSlideViewTo(contentView,  -swipeViewMeasuredWidth, 0);
+        ViewCompat.postInvalidateOnAnimation(contentView);
     }
 
     /**
      * 关闭
      */
     public void close(){
-        if (!isExpand()) {
-            dragHelper.smoothSlideViewTo(contentView, -swipeViewMeasuredWidth, 0);
-            ViewCompat.postInvalidateOnAnimation(contentView);
-        } else {
-            dragHelper.smoothSlideViewTo(contentView, 0, 0);
-            ViewCompat.postInvalidateOnAnimation(contentView);
-        }
+        dragHelper.smoothSlideViewTo(contentView, 0, 0);
+        ViewCompat.postInvalidateOnAnimation(contentView);
     }
 }

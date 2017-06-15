@@ -38,14 +38,12 @@ public class MAdapter extends RecyclerView.Adapter<MAdapter.MViewHolder> {
             @Override
             public void onClick(View view) {
                 onDeleteButtonClickListener.onDeleteClicked(position,mDatas);
-                holder.swipeLayout.close();
             }
         });
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 onItemClickListener.onItemClicked(position,mDatas);
             }
         });

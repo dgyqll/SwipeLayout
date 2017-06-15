@@ -43,6 +43,12 @@ public class MainActivity extends AppCompatActivity implements MAdapter.OnDelete
         mDatas.add("网络请求异常处理");
         mDatas.add("模仿英雄联盟皮肤浏览效果");
         mDatas.add("让你的Kolin代码远离");
+        mDatas.add("网络请求异常处理");
+        mDatas.add("模仿英雄联盟皮肤浏览效果");
+        mDatas.add("让你的Kolin代码远离");
+        mDatas.add("网络请求异常处理");
+        mDatas.add("模仿英雄联盟皮肤浏览效果");
+        mDatas.add("让你的Kolin代码远离");
         adapter.notifyDataSetChanged();
     }
 
